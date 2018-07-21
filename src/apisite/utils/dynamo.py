@@ -37,11 +37,12 @@ def create_people_table(client):
     }
     resp = client.create_table(**kwargs)
 
-def put_people(client, people_id, name, workplace):
+def put_people(client, people_id, name, workplace, position):
     items = {}
     items["PeopleType"] = DEFAULT_PEOPLE_TYPE
     items["NameWorkPlace"] = "%s,%s" % (name, workplace)
     items["PeopleId"] = people_id
+    items["Position"] = position
 
     kwargs = {}
     kwargs["TableName"] = PEOPLE_TABLE_NAME
@@ -55,7 +56,7 @@ def query_peple(client, prefix, limit=10):
     kwargs["TableName"] = PEOPLE_TABLE_NAME
     kwargs["ConsistentRead"] = False
     kwargs["Select"] = 'SPECIFIC_ATTRIBUTES'
-    kwargs["AttributesToGet"] = ["NameWorkPlace", "PeopleId"]
+    kwargs["AttributesToGet"] = ["NameWorkPlace", "PeopleId", "Position"]
     kwargs["Limit"] = limit
     kwargs["ReturnConsumedCapacity"] = 'NONE'
     kwargs["KeyConditionExpression"] = "PeopleType = :people_type AND begins_with ( NameWorkPlace, :prefix )"
@@ -66,7 +67,7 @@ def query_peple(client, prefix, limit=10):
     if resp.has_key('Items'):
         items = resp["Items"]
     for x in items:
-        yield x["NameWorkPlace"], x["PeopleId"]
+        yield x["NameWorkPlace"], x["PeopleId"], x["Position"]
 
 
 def create_user_table(client):
