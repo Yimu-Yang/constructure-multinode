@@ -1,17 +1,17 @@
 import os,binascii
 
-def generate_authentication_token(self, client, user_id):
-    token = binascii.b2a_hex(os.urandom(15))
-    memcached.store(client, 
-        token, user_id)
-    return token
+from . import sqlite
 
-def verify_authentication_token(self, client, token, user_id):
-    try:
-        expected_user_id = memcached.get(client,
-            token)
-        if expected_user_id != user_id:
-            return False
-        return True
-    except:
-        return False
+def generate_authentication_token(self, user_id):
+    token = binascii.b2a_hex(os.urandom(15))
+    with sqlite.DatabaseConnection(sqlite.token_db_path, read_only=False) as conn:
+        conn.begin()
+        conn.execute("INSERT INTO UserTokens (user_id, token) VALUES (?, ?);",
+            (user_id, token))
+        conn.commit()
+
+def verify_authentication_token(self, client, token):
+    with sqlite.DatabaseConnection(sqlite.token_db_path) as conn:
+        res = conn.execute("SELECT user_id FROM UserTokens WHERE token = ?",
+            (token,))
+        return res[0][0] if len(res) else None
