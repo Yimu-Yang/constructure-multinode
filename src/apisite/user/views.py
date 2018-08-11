@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from django.http import HttpResponse
 
-from . import model
+from . import models
 
 def login(request):
 	return HttpResponse("Login \n")
