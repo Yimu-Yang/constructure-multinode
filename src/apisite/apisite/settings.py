@@ -76,8 +76,12 @@ WSGI_APPLICATION = 'apisite.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'testdb',
+        'USER': 'testuser',
+        'PASSWORD': '1992o1o2',
+        'HOST': '/tmp/',
+        'CONN_MAX_AGE': 3600,
     }
 }
 
