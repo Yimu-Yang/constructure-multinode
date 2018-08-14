@@ -18,6 +18,7 @@ class ToVerify(models.Model):
 		related_name='toverify_verifier', db_index=True)
 	verifiee = models.ForeignKey(Users, on_delete=models.CASCADE,
 		related_name='toverify_verifiee', db_index=True)
+	verified = models.IntegerField(default=0)
 
 class Cooperation(models.Model):
 	contractor = models.ForeignKey(Users, on_delete=models.CASCADE,
