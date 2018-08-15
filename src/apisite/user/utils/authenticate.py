@@ -3,10 +3,11 @@ import os,binascii
 from . import sqlite
 
 TOKEN_EXPIRATION_MINS = 60
+TOKEN_DB_PATH = '/usr/bojun/a.db'
 
 def generate_authentication_token(user_id):
     token = binascii.b2a_hex(os.urandom(15))
-    with sqlite.DatabaseConnection(sqlite.token_db_path, read_only=False) as conn:
+    with sqlite.DatabaseConnection(TOKEN_DB_PATH, read_only=False) as conn:
         conn.begin()
         conn.execute("INSERT INTO UserTokens (user_id, token) VALUES (?, ?);",
             (user_id, token))
@@ -14,7 +15,7 @@ def generate_authentication_token(user_id):
     return token
 
 def verify_authentication_token(token):
-    with sqlite.DatabaseConnection(sqlite.token_db_path) as conn:
+    with sqlite.DatabaseConnection(TOKEN_DB_PATH) as conn:
         res = conn.execute("""
             SELECT user_id
             FROM UserTokens
@@ -27,10 +28,13 @@ def verify_authentication_token(token):
         return res[0][0] if len(res) else None
 
 def cleanup_token_db():
-    with sqlite.DatabaseConnection(sqlite.token_db_path) as conn:
+    with sqlite.DatabaseConnection(TOKEN_DB_PATH) as conn:
         conn.begin()
         conn.execute("""
             DELETE FROM UserTokens
             WHERE CURRENT_TIMESTAMP > datetime(creation, '+'||?||' minutes')
             """, (TOKEN_EXPIRATION_MINS, ))
         conn.commit()
+
+if __name__ == '__main__':
+    cleanup_token_db()
