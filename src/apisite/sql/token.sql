@@ -1,0 +1,5 @@
+CREATE TABLE UserTokens (
+    token TEXT PRIMARY KEY,
+    user_id INT NOT NULL,
+    creation DATETIME DEFAULT CURRENT_TIMESTAMP
+);
