@@ -1,7 +1,5 @@
 import apsw
 
-token_db_path="/ddd"
-
 class DatabaseConnection(object):
     def __init__(self, db_path, read_only=True):
         super(DatabaseConnection, self).__init__()

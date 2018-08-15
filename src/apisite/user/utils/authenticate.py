@@ -9,7 +9,9 @@ def generate_authentication_token(user_id):
     token = binascii.b2a_hex(os.urandom(15))
     with sqlite.DatabaseConnection(TOKEN_DB_PATH, read_only=False) as conn:
         conn.begin()
-        conn.execute("INSERT INTO UserTokens (user_id, token) VALUES (?, ?);",
+        conn.execute("""
+            INSERT INTO UserTokens (user_id, token)
+            VALUES (?, ?)""",
             (user_id, token))
         conn.commit()
     return token

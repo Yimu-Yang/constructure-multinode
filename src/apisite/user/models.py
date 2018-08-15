@@ -25,10 +25,6 @@ class Cooperation(models.Model):
 		related_name='cooperation_contractor')
 	contractee = models.ForeignKey(Users, on_delete=models.CASCADE,
 		related_name='cooperation_contractee')
-	contractor_company = models.ForeignKey(Companys, on_delete=models.CASCADE,
-		related_name='cooperation_contractor_company')
-	contractee_company = models.ForeignKey(Companys, on_delete=models.CASCADE,
-		related_name='cooperation_contractee_company')
 	duration = models.IntegerField(default=30)
 	project = models.TextField(max_length=500)
 

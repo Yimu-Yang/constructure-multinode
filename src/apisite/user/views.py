@@ -260,10 +260,73 @@ def search_connection(request):
         obj["message"] = e.message
         return HttpResponse(json.dumps(obj))
 
+def _get_neighbors_company(id):
+    res = []
+    for x in models.Users.objects.filter(company=models.Users.objects.get(pk=id).company):
+        res.append((x.user_name, x.id, None))
+    return res
+
+def _get_neighbors_cooperator(id):
+    res = []
+    for x in models.Cooperation.objects.filter(contractor=models.Users.objects.get(pk=id)):
+        res.append((x.user_name, x.id, x.duration))
+    return res
+
+def _get_neighbors_cooperatee(id):
+    res = []
+    for x in models.Cooperation.objects.filter(contractee=models.Users.objects.get(pk=id)):
+        res.append((x.user_name, x.id, x.duration))
+    return res
+
+def _get_neighbors(id):
+    visited = set()
+    for x in _get_neighbors_company(id):
+        if x[1] in visited:
+            continue
+        visited.add(x[1])
+        yield x
+    for x in _get_neighbors_cooperator(id):
+        if x[1] in visited:
+            continue
+        visited.add(x[1])
+        yield x
+    for x in _get_neighbors_cooperatee(id):
+        if x[1] in visited:
+            continue
+        visited.add(x[1])
+        yield x
+
 def _get_connection(user_id, target_id):
-    # TODO
+    # DFS
     result = []
-    return result
+
+    start_user = models.Users.objects.get(pk=user_id)
+    curr = [(start_user.user_name, user_id, None)]
+    visited = set([user_id])
+
+    def dfs(curr, visited):
+        for x in _get_neighbors(curr[-1][1]):
+            if x[1] == target_id:
+                curr.append(x)
+                result.append(curr[:])
+                curr.pop()
+            if x in visited:
+                continue
+            visited.add(x)
+            curr.append(x)
+            dfs(curr, visited)
+            curr.pop()
+
+    dfs(curr, visited)
+
+    connection_result = []
+
+    list.sort(result, key=len)
+
+    for x in result:
+        connection_result.append(", ".join(["%s %s" % (y[0], y[2]) if y[2] else y[0]]))
+
+    return connection_result
 
 
 
