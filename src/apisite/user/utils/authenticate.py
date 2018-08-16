@@ -3,7 +3,7 @@ import os,binascii
 from . import sqlite
 
 TOKEN_EXPIRATION_MINS = 60
-TOKEN_DB_PATH = '/usr/bojun/a.db'
+TOKEN_DB_PATH = '/Users/bojun/token.db'
 
 def generate_authentication_token(user_id):
     token = binascii.b2a_hex(os.urandom(15))

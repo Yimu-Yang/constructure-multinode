@@ -37,7 +37,7 @@ def login(request):
         obj["message"] = "unknown method"
         return HttpResponse(json.dumps(obj))
     except Exception as e:
-        logging.log(traceback.format_exc())
+        logger.log(traceback.format_exc())
         obj["message"] = e.message
         return HttpResponse(json.dumps(obj))
 
@@ -67,7 +67,7 @@ def register(request):
         obj["message"] = "unknown method"
         return HttpResponse(json.dumps(obj))
     except Exception as e:
-        logging.log(traceback.format_exc())
+        logger.log(traceback.format_exc())
         obj["message"] = e.message
         return HttpResponse(json.dumps(obj))
 
@@ -102,14 +102,14 @@ def request_verify(request):
                 return HttpResponse(json.dumps(obj))
             # At least 5 verifier, success
             # Change user status to pending verification instead of "DEFAULT"
-            user.status = USER_PENDING_VERIFICATION # MEANS pending verification
-            user.save()
+            verifiee.status = USER_PENDING_VERIFICATION # MEANS pending verification
+            verifiee.save()
             obj["status"] = 1
             return HttpResponse(json.dumps(obj))
         obj["message"] = "unknown method"
         return HttpResponse(json.dumps(obj))
     except Exception as e:
-        logging.log(traceback.format_exc())
+        logger.log(traceback.format_exc())
         obj["message"] = e.message
         return HttpResponse(json.dumps(obj))
 
@@ -129,14 +129,14 @@ def get_verify_status(request):
 
             result = []
             for x in models.ToVerify.objects.filter(verifier=user_id):
-                result.append({"name": x.verifiee.user_name})
+                result.append({"name": x.verifiee.user_name, "id": x.verifiee.id})
             obj["result"] = result
             obj["status"] = 1
             return HttpResponse(json.dumps(obj))
         obj["message"] = "unknown method"
         return HttpResponse(json.dumps(obj))
     except Exception as e:
-        logging.log(traceback.format_exc())
+        logger.log(traceback.format_exc())
         obj["message"] = e.message
         return HttpResponse(json.dumps(obj))
 
@@ -155,7 +155,7 @@ def verify_user(request):
                 obj["message"] = NEED_LOGIN_MESSAGE
                 return HttpResponse(json.dumps(obj))
 
-            verifiee_id = body["user_id"]
+            verifiee_id = body["userId"]
             # Change verification status to 1
             to_verify = models.ToVerify.objects.get(verifiee=verifiee_id, verifier=user_id)
             to_verify.verified = 1
@@ -172,7 +172,7 @@ def verify_user(request):
         obj["message"] = "unknown method"
         return HttpResponse(json.dumps(obj))
     except Exception as e:
-        logging.log(traceback.format_exc())
+        logger.log(traceback.format_exc())
         obj["message"] = e.message
         return HttpResponse(json.dumps(obj))
 
@@ -189,7 +189,7 @@ def search_company(request):
         obj["message"] = "unknown method"
         return HttpResponse(json.dumps(obj))
     except Exception as e:
-        logging.log(traceback.format_exc())
+        logger.log(traceback.format_exc())
         obj["message"] = e.message
         return HttpResponse(json.dumps(obj))
 
@@ -205,7 +205,7 @@ def search_user(request):
         obj["message"] = "unknown method"
         return HttpResponse(json.dumps(obj))
     except Exception as e:
-        logging.log(traceback.format_exc())
+        logger.log(traceback.format_exc())
         obj["message"] = e.message
         return HttpResponse(json.dumps(obj))
 
@@ -232,7 +232,7 @@ def search_worker(request):
         obj["message"] = "unknown method"
         return HttpResponse(json.dumps(obj))
     except Exception as e:
-        logging.log(traceback.format_exc())
+        logger.log(traceback.format_exc())
         obj["message"] = e.message
         return HttpResponse(json.dumps(obj))
 
@@ -256,7 +256,7 @@ def search_connection(request):
         obj["message"] = "unknown method"
         return HttpResponse(json.dumps(obj))
     except Exception as e:
-        logging.log(traceback.format_exc())
+        logger.log(traceback.format_exc())
         obj["message"] = e.message
         return HttpResponse(json.dumps(obj))
 
