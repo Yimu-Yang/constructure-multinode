@@ -12,11 +12,6 @@ from .utils import prefixes
 from .utils import logger
 from .utils import authenticate
 
-USER_PENDING_VERIFICATION = 2
-USER_NORMAL = 3
-NEED_LOGIN_STATUS = 4
-NEED_LOGIN_MESSAGE = "Needs Login"
-
 # TODO: Token timeout, and authentication exception
 
 def login(request):
@@ -278,53 +273,58 @@ def search_connection(request):
 
 def _get_neighbors_company(id):
     res = []
-    for x in models.Users.objects.filter(company=models.Users.objects.get(pk=id).company):
-        res.append((x.user_name, x.id, None))
+    for x in Experiences.objects.filter(company__experiences__user_id=id,
+                                        todo=0, company__experiences__todo=0):
+        res.append((x.user.user_name, x.user.id, duration))
     return res
 
 def _get_neighbors_cooperator(id):
     res = []
-    for x in models.Cooperation.objects.filter(contractor=models.Users.objects.get(pk=id)):
-        res.append((x.user_name, x.id, x.duration))
+    for x in Experiences.objects.filter(project__experiences__user_id=id,
+                                        todo=0, project__experiences__todo=0):
+        res.append((x.user.user_name, x.user.id, duration))
     return res
 
-def _get_neighbors_cooperatee(id):
-    res = []
-    for x in models.Cooperation.objects.filter(contractee=models.Users.objects.get(pk=id)):
-        res.append((x.user_name, x.id, x.duration))
-    return res
 
 def _get_neighbors(id):
     visited = set()
+    visited.add(id)
     for x in _get_neighbors_company(id):
         if x[1] in visited:
             continue
         visited.add(x[1])
         yield x
-    for x in _get_neighbors_cooperator(id):
+    for x in _get_neighbors_project(id):
         if x[1] in visited:
             continue
         visited.add(x[1])
         yield x
-    for x in _get_neighbors_cooperatee(id):
-        if x[1] in visited:
-            continue
-        visited.add(x[1])
-        yield x
+
+def _to_readable(days):
+    if days < 365:
+        return "%d月" % (days/30 + 1)
+    return "%d年" % (days/365 + 1)
+
+def _process_result(connection_result):
+    res = []
+    for x in connection_result[1:]:
+        res.append({"name": x[0], "id": x[1], "year": _to_readable(x[2])})
+    return res
 
 def _get_connection(user_id, target_id):
     # DFS
     result = []
 
     start_user = models.Users.objects.get(pk=user_id)
-    curr = [(start_user.user_name, user_id, None)]
+    curr = [(start_user.user_name, user_id, 0)]
     visited = set([user_id])
 
     def dfs(curr, visited):
         for x in _get_neighbors(curr[-1][1]):
             if x[1] == target_id:
                 curr.append(x)
-                result.append(curr[:])
+                # Process Result
+                result.append(_process_result(curr))
                 curr.pop()
             if x in visited:
                 continue
@@ -335,14 +335,9 @@ def _get_connection(user_id, target_id):
 
     dfs(curr, visited)
 
-    connection_result = []
-
     list.sort(result, key=len)
 
-    for x in result:
-        connection_result.append(", ".join(["%s %s" % (y[0], y[2]) if y[2] else y[0]]))
-
-    return connection_result
+    return result
 
 
 
