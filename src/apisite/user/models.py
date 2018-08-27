@@ -31,3 +31,7 @@ class Cooperation(models.Model):
 class CompaniedUsers(models.Model):
 	user_company = models.TextField(max_length=140)
 	user_table_id = models.IntegerField(default=0)
+
+class Document(models.Model):
+	
+    document = models.FileField(upload_to='documents/')

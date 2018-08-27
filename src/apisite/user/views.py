@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 from django.http import HttpResponse
+
 import traceback
 import json
 
@@ -40,6 +41,21 @@ def login(request):
         logger.log(traceback.format_exc())
         obj["message"] = e.message
         return HttpResponse(json.dumps(obj))
+
+def handle_uploaded_file(f):
+    # FIXME
+    with open('/tmp/name.txt', 'wb+') as destination:
+        for chunk in f.chunks():
+            destination.write(chunk)
+
+def upload_picture(request):
+    if request.method == "POST":
+        print(request.FILES)
+        print(type(request.FILES['picture']))
+        handle_uploaded_file(request.FILES['picture'])
+        return HttpResponse("upload OK\n")
+    return HttpResponse("uploadfailed \n")
+
 
 def logout(request):
     return HttpResponse("Logout \n")
