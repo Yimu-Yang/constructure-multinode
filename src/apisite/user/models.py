@@ -29,6 +29,7 @@ class Experiences(models.Model):
 	todo = models.IntegerField(default=5)
 	start = models.DateField(default=datetime.date.today)
 	duration = models.IntegerField(default=1)
+	job = models.TextField(max_length=10)
 
 class ToVerify(models.Model):
 	user = models.ForeignKey(Users, on_delete=models.CASCADE,

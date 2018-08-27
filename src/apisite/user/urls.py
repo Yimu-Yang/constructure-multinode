@@ -11,6 +11,7 @@ urlpatterns = [
     url('requestVerify', views.request_verify, name="requestVerify"),
     url('getVerifyStatus', views.get_verify_status, name="getVerifyStatus"),
     url('verifyUser', views.verify_user, name="verifyUser"),
+    url('cooperation', views.cooperation, name="cooperation"),
     url('searchCompany', views.search_company, name="searchCompany"),
     url('searchUser', views.search_user, name="searchUser"),
     url('searchWorker', views.search_worker, name="searchWorker"),

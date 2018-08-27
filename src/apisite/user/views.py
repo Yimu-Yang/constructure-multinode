@@ -12,6 +12,9 @@ from .utils import prefixes
 from .utils import logger
 from .utils import authenticate
 
+NEED_LOGIN_STATUS = 2
+NEED_LOGIN_MESSAGE = "Needs Login"
+
 # TODO: Token timeout, and authentication exception
 
 def login(request):
@@ -247,6 +250,50 @@ def search_worker(request):
         obj["message"] = e.message
         return HttpResponse(json.dumps(obj))
 
+def cooperation(request):
+    obj = {}
+    obj["status"] = 0
+    obj["result"] = {}
+    try:
+        if request.method == "GET":
+            target_id = request.GET.get('id')
+            user_id = authenticate.verify_authentication_token(request.META.get("HTTP_TOKEN"))
+            # Needs login
+            if not user_id:
+                obj["status"] = NEED_LOGIN_STATUS
+                obj["message"] = NEED_LOGIN_MESSAGE
+                return HttpResponse(json.dumps(obj))
+
+            obj["result"] = _get_cooperation(user_id, target_id)
+            obj["status"] = 1
+            return HttpResponse(json.dumps(obj))
+        obj["message"] = "unknown method"
+        return HttpResponse(json.dumps(obj))
+    except Exception as e:
+        logger.log(traceback.format_exc())
+        obj["message"] = e.message
+        return HttpResponse(json.dumps(obj))
+
+def _get_cooperation(user_id, target_id):
+    partyA = models.Users.objects.get(pk=user_id)
+    partyB = models.Users.objects.get(pk=target_id)
+    history = []
+    for x in models.Experiences.objects.filter(project__experiences__user_id=user_id,
+                                              todo=0, project__experiences__todo=0,
+                                              user_id=target_id):
+        history.append({"job": x.job,
+                        "duration": x.duration,
+                        "content": x.project.project_name})
+    for x in models.Experiences.objects.filter(company__experiences__user_id=user_id,
+                                              todo=0, company__experiences__todo=0,
+                                              user_id=target_id):
+        history.append({"job": x.job,
+                        "duration": x.duration,
+                        "content": x.company.company_name})
+    return {"partyA": {"name": partyA.user_name, "job": partyA.position},
+            "partyB": {"name": partyB.user_name, "job": partyB.position},
+            "history": history}
+
 def search_connection(request):
     obj = {}
     obj["status"] = 0
@@ -273,14 +320,14 @@ def search_connection(request):
 
 def _get_neighbors_company(id):
     res = []
-    for x in Experiences.objects.filter(company__experiences__user_id=id,
+    for x in models.Experiences.objects.filter(company__experiences__user_id=id,
                                         todo=0, company__experiences__todo=0):
         res.append((x.user.user_name, x.user.id, duration))
     return res
 
 def _get_neighbors_cooperator(id):
     res = []
-    for x in Experiences.objects.filter(project__experiences__user_id=id,
+    for x in models.Experiences.objects.filter(project__experiences__user_id=id,
                                         todo=0, project__experiences__todo=0):
         res.append((x.user.user_name, x.user.id, duration))
     return res
